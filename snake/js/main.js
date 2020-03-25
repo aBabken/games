@@ -1,32 +1,33 @@
-const canvas    = document.getElementById("body");
-const ctx       = canvas.getContext('2d');
+const ctx       = document.getElementById("body").getContext('2d');
 const ground    = new Image();
 const food      = new Image();
 const head      = new Image();
+const body      = new Image();
 let box         = 32;
 let score       = 0;
-let orin;
+let snake       = [];
+let bodies      = ["/img/body-middle.png", "/img/body-middle-angle.png", "/img/head-down.png", "/img/head-left.png", "/img/head-right.png", "/img/head-up.png", "/img/tail.png"]
 ground.src      = "/img/bg.png";
 food.src        = "/img/food.png";
-let meal = {
-    x: Math.floor(Math.random() * 19 + 1.5) * box,
-    y: Math.floor(Math.random() * 10 + 1) * box
-}
-let snake = [];
-snake[0] = {
-    x: 10 * box,
-    y: 5 * box
-}
+head.src        = bodies[2];
+body.src        = "/img/body-middle.png"
+let meal        = { x: Math.floor(Math.random() * 19 + 1.5) * box, y: Math.floor(Math.random() * 10 + 1) * box }
+snake[0]        = { x: 10 * box, y: 5 * box }
+let orin;
 document.addEventListener("keydown", orientation);
 function orientation(event) {
     if (event.keyCode == 37 && orin != "right") {
         orin = "left";
+        head.src = bodies[3];
     } else if (event.keyCode == 38 && orin != "down") {
         orin = "up";
+        head.src = bodies[5];
     } else if (event.keyCode == 39 && orin != "left") {
         orin = "right";
+        head.src = bodies[4];
     } else if (event.keyCode == 40 && orin != "up") {
         orin = "down";
+        head.src = bodies[2];
     }
 }
 function eatItself(head, arr) {
@@ -36,13 +37,31 @@ function eatItself(head, arr) {
         }
     }
 }
+function snakeDraw(body, x, y) {
+    ctx.drawImage(body, x, y);
+}
 function draw() {
     ctx.drawImage(ground, 0, 0);
     ctx.drawImage(food, meal.x, meal.y);
+    
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = i % 2 == 0 ? "#171717" : "#0E0E0E";
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        
+            snakeDraw(head, snake[0].x, snake[0].y);
+            
+            if (i == snake.length - 1 && i > 0) {
+                
+                console.log(snake[i].x, snake[i].y);
+                ctx.fillStyle = "#736D6A";
+                ctx.beginPath();
+                ctx.ellipse(snake[i].x + 15, snake[i].y + 15, 12, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (i > 1) {
+                ctx.fillStyle = "#736D6A";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+            }
     }
+    
     let snX = snake[0].x;
     let snY = snake[0].y;
     if (snX == meal.x && snY == meal.y) {
@@ -52,7 +71,7 @@ function draw() {
     } else {
         snake.pop()
     }
-    console.log(snX, snY)
+    
     if (snX < box || snX > box * 20 || snY < box || snY > box * 11) {
         alert("Over")
         clearInterval(game);
@@ -69,4 +88,4 @@ function draw() {
     eatItself(new_head, snake);
     snake.unshift(new_head);
 }
-let game = setInterval(draw, 100);
+let game = setInterval(draw, 120);
